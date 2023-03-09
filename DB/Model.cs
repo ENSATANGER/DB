@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.Dynamic;
 using System.Linq;
 using System.Text;
@@ -102,7 +104,11 @@ namespace DB
 
                 sql = sqlBuilder.ToString();
             }
-            return -1;
+            
+            if (Connexion.IUD(sql) != 0)
+                return 0;
+
+            return -1; // cas d'erreur
         }
 
         public dynamic find()
@@ -110,6 +116,12 @@ namespace DB
             Dictionary<string, object> dico = new Dictionary<string, object>();
 
             sql = "select * from " + this.GetType().Name + " where id=" + id;
+
+            IDataReader data = Connexion.Select(sql);
+
+            for(int i = 0; i < data.FieldCount; i++)
+
+                dico.Add(data.GetName(i),data.GetValue(i));
 
             return DictionaryToObject(dico);
         }

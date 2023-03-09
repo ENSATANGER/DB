@@ -40,6 +40,9 @@ namespace DB
         {
             Dictionary<string, string> dico = new Dictionary<string, string>();
             dico = ObjectToDictionary<string>(this);
+
+            Dictionary<string, string> ChampsTable = Connexion.getChamps_table(this.GetType().Name);
+
             if(this.id == 0)
             {
                 StringBuilder sqlBuilder = new StringBuilder();
@@ -48,12 +51,12 @@ namespace DB
                 sqlBuilder.Append("(");
 
                 int c = 0;
-                foreach (KeyValuePair<string, string> kvp in dico)
+                foreach (KeyValuePair<string, string> kvp in ChampsTable)
                 {
-                    if(kvp.Key != "id"){
+                    if(kvp.Value != "id"){
                         if (c > 0)
                             sqlBuilder.Append(",");
-                        sqlBuilder.Append(kvp.Key);
+                        sqlBuilder.Append(kvp.Value);
                         c++;
                     }
                 }
@@ -83,18 +86,19 @@ namespace DB
                 sqlBuilder.Append("UPDATE ");
                 sqlBuilder.Append(this.GetType().Name);
                 sqlBuilder.Append(" SET ");
-
+                
                 int c = 0;
-                foreach (KeyValuePair<string, string> kvp in dico)
+                // work with two dictionaries at the same time
+                foreach (var pair in ChampsTable.Zip(dico, (champ, newvalue) => new { Champ = champ, NewValue = newvalue }))
                 {
-                    if (kvp.Key != "id")
+                    if (pair.Champ.Value != "id")
                     {
                         if (c > 0)
                             sqlBuilder.Append(",");
-                        sqlBuilder.Append(kvp.Key);
+                        sqlBuilder.Append(pair.Champ.Value);
                         sqlBuilder.Append("=");
                         sqlBuilder.Append("'");
-                        sqlBuilder.Append(kvp.Value);
+                        sqlBuilder.Append(pair.NewValue.Value);
                         sqlBuilder.Append("'");
                         c++;
                     }

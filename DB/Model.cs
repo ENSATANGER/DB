@@ -27,7 +27,7 @@ namespace DB
             return keyValues;
         }
 
-        private dynamic DictionaryToObject(Dictionary<string, object> dico)
+        private static dynamic DictionaryToObject(Dictionary<string, object> dico)
         {
             dynamic obj = new ExpandoObject();
             var dictonary = (IDictionary<string, object>)obj;
@@ -184,7 +184,6 @@ namespace DB
                 }
             }
             reader.Close();
-
             return DictionaryToObject(dico);
         }
 

@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Data;
 using System.Dynamic;
 using System.Linq;
+using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using System.Text;
 using System.Threading.Tasks;
+
+
 
 namespace DB
 {
@@ -131,24 +134,24 @@ namespace DB
         }
 
 
-        public List<dynamic> All()
-        {
-            List<dynamic> L = new List<dynamic>();
-            sql = "select * from" + GetType().Name;
-            IDataReader reader = Connexion.Select(sql);
+        // public List<dynamic> All()
+        // {
+        //     List<dynamic> L = new List<dynamic>();
+        //     sql = "select * from" + GetType().Name;
+        //     IDataReader reader = Connexion.Select(sql);
 
-            while (reader.Read())
-            {
-                Dictionary<string, object> dico = new Dictionary<string, object>();
+        //     while (reader.Read())
+        //     {
+        //         Dictionary<string, object> dico = new Dictionary<string, object>();
 
-                for (int i = 0; i < reader.FieldCount; i++)
-                    dico.Add(reader.GetName(i),reader.GetValue(i));
+        //         for (int i = 0; i < reader.FieldCount; i++)
+        //             dico.Add(reader.GetName(i),reader.GetValue(i));
 
-                 L.Add(dico);
-            }
-            reader.Close();
-            return L;
-        }
+        //          L.Add(dico);
+        //     }
+        //     reader.Close();
+        //     return L;
+        // }
 
         public static List<dynamic> all<T>()
         {
@@ -178,6 +181,109 @@ namespace DB
         public static List<dynamic> select<T>(Dictionary<string, object> dico)
         {
                 return new List<dynamic>();
+
+        //louay's contribution
+
+        public static dynamic find<T>(int id)
+        {
+            Dictionary<string, object> dico = new Dictionary<string, object>();
+
+            
+            String sql = "select * from " + typeof(T).Name + " where id = @id";
+
+            
+            //open connexion using Connexion class
+            Connexion.Connect();
+            
+            //create command object using IDbCommand interface
+            //and the opened connection object
+            IDbCommand cmd = Connexion.con.CreateCommand();
+            cmd.CommandText = sql;
+            
+            //add id parameter to command
+            IDbDataParameter param = cmd.CreateParameter();
+            param.ParameterName = "@id";
+            param.Value = id;
+
+            //add param to cmd object
+            cmd.Parameters.Add(param);
+            
+            //execute query and read data with IDataReader
+            IDataReader reader = cmd.ExecuteReader();
+
+            // loop through columns and rows to add the name and value to disco
+            if (reader.Read())
+            {
+                for(int i=0; i< reader.FieldCount; i++)
+                {
+                    string columnName = reader.GetName(i);
+                    Object columnValue = reader.GetValue(i);
+                    disco[columnName] = columnValue;
+                }
+            }
+            reader.Close();
+            Connexion.con.Close();
+            return DictionaryToObject<T>(dico);
+        }
+
+        
+        ////////////////////////////////////////////
+     
+        public int delete()
+        {
+            int rowsAffected = 0;
+            String sql = "DELETE from " + this.GetType().Name + " where id = @id";
+
+
+            //open connexion using Connexion class
+            Connexion.Connect();
+
+            //create command object using IDbCommand interface
+            //and the opened connection object
+            IDbCommand cmd = Connexion.con.CreateCommand();
+            cmd.CommandText = sql;
+
+            //add id parameter to command
+            IDbDataParameter param = cmd.CreateParameter();
+            param.ParameterName = "@id";
+            param.Value = id;
+
+            //add param to cmd object
+            cmd.Parameters.Add(param);
+
+            //execute the delete query and get the number of deleted rows
+            rowsAffected = cmd.ExecuteNonQuery();
+
+            Connexion.con.Close();
+            return rowsAffected;
+        }
+
+        ////////////////////////////////////
+
+        public List<dynamic> All()
+        {
+            List<dynamic> records = new List<dynamic>();
+
+            // Execute a query to retrieve all records for the table
+            string query = $"SELECT * FROM {GetTableName()}";
+            
+            // it seems like using(...){...} is a better way to use reader
+            // to ensure that there is no resource leaks
+            using (IDataReader reader = Connexion.Select(query))
+            {
+                while (reader.Read())
+                {
+                    Dictionary<string, object> record = new Dictionary<string, object>();
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        string columnName = reader.GetName(i);
+                        object value = reader.GetValue(i);
+                        record[columnName] = value;
+                    }
+                    records.Add(record);
+                }
+            }
+            return records;
         }
     }
 }

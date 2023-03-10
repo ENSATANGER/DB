@@ -4,8 +4,11 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Dynamic;
 using System.Linq;
+using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using System.Text;
 using System.Threading.Tasks;
+
+
 
 namespace DB
 {
@@ -128,6 +131,46 @@ namespace DB
 
         //louay's contribution
 
-        public 
+        public static dynamic find<T>(int id)
+        {
+            Dictionary<string, object> dico = new Dictionary<string, object>();
+
+            
+            String sql = "select * from " + typeof(T).Name + " where id = @id";
+
+            
+            //open connexion using Connexion class
+            Connexion.Connect();
+            
+            //create command object using IDbCommand interface
+            //and the opened connection object
+            IDbCommand cmd = Connexion.con.CreateCommand();
+            cmd.CommandText = sql;
+            
+            //add id parameter to command
+            IDbDataParameter param = cmd.CreateParameter();
+            param.ParameterName = "@id";
+            param.Value = id;
+
+            //add param to cmd object
+            cmd.Parameters.Add(param);
+            
+            //execute query and read data with IDataReader
+            IDataReader reader = cmd.ExecuteReader();
+
+            // loop through columns and rows to add the name and value to disco
+            if (reader.Read())
+            {
+                for(int i=0; i< reader.FieldCount; i++)
+                {
+                    string columnName = reader.GetName(i);
+                    Object columnValue = reader.GetValue(i);
+                    disco[columnName] = columnValue;
+                }
+            }
+            reader.Close();
+            Connexion.con.Close();
+            return DictionaryToObject<T>(dico);
+        }
     }
 }

@@ -129,6 +129,8 @@ namespace DB
             return DictionaryToObject(dico);
         }
 
+
+
         //louay's contribution
 
         public static dynamic find<T>(int id)
@@ -171,6 +173,43 @@ namespace DB
             reader.Close();
             Connexion.con.Close();
             return DictionaryToObject<T>(dico);
+        }
+
+        
+        ////////////////////////////////////////////
+     
+        public int delete()
+        {
+            int rowsAffected = 0;
+            String sql = "DELETE from " + this.GetType().Name + " where id = @id";
+
+
+            //open connexion using Connexion class
+            Connexion.Connect();
+
+            //create command object using IDbCommand interface
+            //and the opened connection object
+            IDbCommand cmd = Connexion.con.CreateCommand();
+            cmd.CommandText = sql;
+
+            //add id parameter to command
+            IDbDataParameter param = cmd.CreateParameter();
+            param.ParameterName = "@id";
+            param.Value = id;
+
+            //add param to cmd object
+            cmd.Parameters.Add(param);
+
+            //execute the delete query and get the number of deleted rows
+            rowsAffected = cmd.ExecuteNonQuery();
+
+            Connexion.con.Close();
+            return rowsAffected;
+        }
+
+        public List<dynamic> All()
+        {
+
         }
     }
 }

@@ -47,7 +47,7 @@ namespace DB
         }*/
         public List<dynamic> All()
         {
-            List<dynamic> L = new List<dynamic>();
+            List<GetType()> L = new List<GetType>();
             sql = "select * from" + GetType().Name;
             IDataReader reader = Connexion.Select(sql);
 
@@ -55,24 +55,42 @@ namespace DB
             {
                 Dictionary<string, object> dico = new Dictionary<string, object>();
 
-                int id = reader.GetInt32(0);
-                string name = reader.GetString(1);
-                decimal price = reader.GetDecimal(2);
-                dico.Add(reader.GetInt32(0), new );
-                 L.Add(dico);
+                for (int i = 0; i < reader.FieldCount; i++)
+                    dico.Add(reader.GetName(i),reader.GetValue(i));
 
+                 L.Add(dico);
             }
 
             reader.Close();
-            return new List<dynamic>();
+            return L;
         }
+
         public static List<dynamic> all<T>()
         {
             return new List<dynamic>();
         }
+
         public List<dynamic> Select(Dictionary<string, object> dico)
         {
-            return new List<dynamic>();
+            List <GetType()> L = new List<GetType>();
+
+            sql = "select * from " + GetType().Name + " where ";
+            foreach (KeyValuePair<string, Etudiant> e in dico)
+                sql+= e.Key + "=" + e.Value);
+
+            IDataReader reader = Connexion.Select(sql);
+
+            while (reader.Read())
+            {
+                Dictionary<string, object> dico = new Dictionary<string, object>();
+
+                for (int i = 0; i < reader.FieldCount; i++)
+                    dico.Add(reader.GetName(i), reader.GetValue(i));
+
+                L.Add(dico);
+            }
+            reader.Close();
+            return L;
         }
         public static List<dynamic> select<T>(Dictionary<string, object> dico)
         {

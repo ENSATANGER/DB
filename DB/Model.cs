@@ -19,11 +19,11 @@ namespace DB
 
         Dictionary<string, T> ObjectToDictionary<T>(object obj)
         {
-            Dictionary<string,T> keyValues = new Dictionary<string,T>();
+            Dictionary<string, T> keyValues = new Dictionary<string, T>();
             var properties = obj.GetType().GetProperties();
-            foreach ( var property in properties )
+            foreach (var property in properties)
             {
-                keyValues.Add(property.Name,(T)property.GetValue(obj));
+                keyValues.Add(property.Name, (T)property.GetValue(obj));
             }
             return keyValues;
         }
@@ -32,7 +32,7 @@ namespace DB
         {
             dynamic obj = new ExpandoObject();
             var dictonary = (IDictionary<string, object>)obj;
-            foreach(KeyValuePair<string, object> kvp in dico)
+            foreach (KeyValuePair<string, object> kvp in dico)
             {
                 dictonary.Add(kvp.Key, kvp.Value);
             }
@@ -43,7 +43,10 @@ namespace DB
         {
             Dictionary<string, string> dico = new Dictionary<string, string>();
             dico = ObjectToDictionary<string>(this);
-            if(this.id == 0)
+
+            Dictionary<string, string> ChampsTable = Connexion.getChamps_table(this.GetType().Name);
+
+            if (this.id == 0)
             {
                 StringBuilder sqlBuilder = new StringBuilder();
                 sqlBuilder.Append("INSERT INTO ");
@@ -51,12 +54,13 @@ namespace DB
                 sqlBuilder.Append("(");
 
                 int c = 0;
-                foreach (KeyValuePair<string, string> kvp in dico)
+                foreach (KeyValuePair<string, string> kvp in ChampsTable)
                 {
-                    if(kvp.Key != "id"){
+                    if (kvp.Value != "id")
+                    {
                         if (c > 0)
                             sqlBuilder.Append(",");
-                        sqlBuilder.Append(kvp.Key);
+                        sqlBuilder.Append(kvp.Value);
                         c++;
                     }
                 }
@@ -88,16 +92,17 @@ namespace DB
                 sqlBuilder.Append(" SET ");
 
                 int c = 0;
-                foreach (KeyValuePair<string, string> kvp in dico)
+                // work with two dictionaries at the same time
+                foreach (var pair in ChampsTable.Zip(dico, (champ, newvalue) => new { Champ = champ, NewValue = newvalue }))
                 {
-                    if (kvp.Key != "id")
+                    if (pair.Champ.Value != "id")
                     {
                         if (c > 0)
                             sqlBuilder.Append(",");
-                        sqlBuilder.Append(kvp.Key);
+                        sqlBuilder.Append(pair.Champ.Value);
                         sqlBuilder.Append("=");
                         sqlBuilder.Append("'");
-                        sqlBuilder.Append(kvp.Value);
+                        sqlBuilder.Append(pair.NewValue.Value);
                         sqlBuilder.Append("'");
                         c++;
                     }
@@ -107,7 +112,7 @@ namespace DB
 
                 sql = sqlBuilder.ToString();
             }
-            
+
             if (Connexion.IUD(sql) != 0)
                 return 0;
 
@@ -122,14 +127,12 @@ namespace DB
 
             IDataReader data = Connexion.Select(sql);
 
-            for(int i = 0; i < data.FieldCount; i++)
+            for (int i = 0; i < data.FieldCount; i++)
 
-                dico.Add(data.GetName(i),data.GetValue(i));
+                dico.Add(data.GetName(i), data.GetValue(i));
 
             return DictionaryToObject(dico);
         }
-
-
 
         //louay's contribution
 

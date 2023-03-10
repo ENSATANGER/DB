@@ -133,36 +133,7 @@ namespace DB
             return DictionaryToObject(dico);
         }
 
-        public static List<dynamic> all<T>()
-        {
-            return new List<dynamic>();
-        }
-
-        public List<dynamic> Select(Dictionary<string, object> dico)
-        {
-
-            List<dynamic> L = new List<dynamic>();
-
-            sql = "select * from " + GetType().Name + " where ";
-            foreach (KeyValuePair<string, object> e in dico)
-                sql += e.Key + "=" + e.Value;
-
-            IDataReader reader = Connexion.Select(sql);
-
-            while (reader.Read())
-            {
-                for (int i = 0; i < reader.FieldCount; i++)
-                    dico.Add(reader.GetName(i), reader.GetValue(i));
-
-                L.Add(dico);
-            }
-            reader.Close();
-            return L;
-        }
-        public static List<dynamic> select<T>(Dictionary<string, object> dico)
-        {
-            return new List<dynamic>();
-        }
+       
 
         //louay's contribution
 
@@ -213,7 +184,7 @@ namespace DB
                 for (int i = 0; i < reader.FieldCount; i++)
                     dico.Add(reader.GetName(i), reader.GetValue(i));
 
-                L.Add(dico);
+                L.Add(DictionaryToObject(dico));
             }
             reader.Close();
             return L;
@@ -243,5 +214,38 @@ namespace DB
             }
             return records;
         }*/
+
+        public static List<dynamic> all<T>() where T : Model
+        {
+            var obj = (T)Activator.CreateInstance(typeof(T));
+            return obj.All();
+        }
+
+        public List<dynamic> Select(Dictionary<string, object> dico)
+        {
+
+            List<dynamic> L = new List<dynamic>();
+
+            sql = "select * from " + GetType().Name + " where ";
+            foreach (KeyValuePair<string, object> e in dico)
+                sql += e.Key + "=" + e.Value;
+
+            IDataReader reader = Connexion.Select(sql);
+
+            while (reader.Read())
+            {
+                for (int i = 0; i < reader.FieldCount; i++)
+                    dico.Add(reader.GetName(i), reader.GetValue(i));
+
+                L.Add(DictionaryToObject(dico));
+            }
+            reader.Close();
+            return L;
+        }
+        public static List<dynamic> select<T>(Dictionary<string, object> dico) where T : Model
+        {
+            var obj = (T)Activator.CreateInstance(typeof(T));
+            return obj.Select(dico);
+        }
     }
 }

@@ -133,25 +133,23 @@ namespace DB
             return DictionaryToObject(dico);
         }
 
+        /*public List<dynamic> All()
+        {
+            List<dynamic> L = new List<dynamic>();
+            sql = "select * from" + GetType().Name;
+            IDataReader reader = Connexion.Select(sql);
+            while (reader.Read())
+            {
+                Dictionary<string, object> dico = new Dictionary<string, object>();
 
-        // public List<dynamic> All()
-        // {
-        //     List<dynamic> L = new List<dynamic>();
-        //     sql = "select * from" + GetType().Name;
-        //     IDataReader reader = Connexion.Select(sql);
+                for (int i = 0; i < reader.FieldCount; i++)
+                    dico.Add(reader.GetName(i), reader.GetValue(i));
 
-        //     while (reader.Read())
-        //     {
-        //         Dictionary<string, object> dico = new Dictionary<string, object>();
-
-        //         for (int i = 0; i < reader.FieldCount; i++)
-        //             dico.Add(reader.GetName(i),reader.GetValue(i));
-
-        //          L.Add(dico);
-        //     }
-        //     reader.Close();
-        //     return L;
-        // }
+                L.Add(dico);
+            }
+            reader.Close();
+            return L;
+        }*/
 
         public static List<dynamic> all<T>()
         {
@@ -160,11 +158,12 @@ namespace DB
 
         public List<dynamic> Select(Dictionary<string, object> dico)
         {
-            List <dynamic> L = new List<dynamic>();
+
+            List<dynamic> L = new List<dynamic>();
 
             sql = "select * from " + GetType().Name + " where ";
             foreach (KeyValuePair<string, object> e in dico)
-                sql+= e.Key + "=" + e.Value;
+                sql += e.Key + "=" + e.Value;
 
             IDataReader reader = Connexion.Select(sql);
 
@@ -180,7 +179,8 @@ namespace DB
         }
         public static List<dynamic> select<T>(Dictionary<string, object> dico)
         {
-                return new List<dynamic>();
+            return new List<dynamic>();
+        }
 
         //louay's contribution
 

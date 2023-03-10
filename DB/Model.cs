@@ -27,7 +27,7 @@ namespace DB
             return keyValues;
         }
 
-        private dynamic DictionaryToObject(Dictionary<String, object> dico)
+        private dynamic DictionaryToObject(Dictionary<string, object> dico)
         {
             dynamic obj = new ExpandoObject();
             var dictonary = (IDictionary<string, object>)obj;
@@ -133,24 +133,6 @@ namespace DB
             return DictionaryToObject(dico);
         }
 
-        /*public List<dynamic> All()
-        {
-            List<dynamic> L = new List<dynamic>();
-            sql = "select * from" + GetType().Name;
-            IDataReader reader = Connexion.Select(sql);
-            while (reader.Read())
-            {
-                Dictionary<string, object> dico = new Dictionary<string, object>();
-
-                for (int i = 0; i < reader.FieldCount; i++)
-                    dico.Add(reader.GetName(i), reader.GetValue(i));
-
-                L.Add(dico);
-            }
-            reader.Close();
-            return L;
-        }*/
-
         public static List<dynamic> all<T>()
         {
             return new List<dynamic>();
@@ -188,79 +170,55 @@ namespace DB
         {
             Dictionary<string, object> dico = new Dictionary<string, object>();
 
-            
-            String sql = "select * from " + typeof(T).Name + " where id = @id";
+             string req = "select * from " + typeof(T).Name + " where id =" + id;
 
-            
-            //open connexion using Connexion class
-            Connexion.Connect();
-            
-            //create command object using IDbCommand interface
-            //and the opened connection object
-            IDbCommand cmd = Connexion.con.CreateCommand();
-            cmd.CommandText = sql;
-            
-            //add id parameter to command
-            IDbDataParameter param = cmd.CreateParameter();
-            param.ParameterName = "@id";
-            param.Value = id;
-
-            //add param to cmd object
-            cmd.Parameters.Add(param);
-            
             //execute query and read data with IDataReader
-            IDataReader reader = cmd.ExecuteReader();
+            IDataReader reader = Connexion.Select(req);
 
             // loop through columns and rows to add the name and value to disco
-            if (reader.Read())
+            if (reader != null)
             {
                 for(int i=0; i< reader.FieldCount; i++)
                 {
-                    string columnName = reader.GetName(i);
-                    Object columnValue = reader.GetValue(i);
-                    disco[columnName] = columnValue;
+                    dico.Add(reader.GetName(i), reader.GetValue(i));
                 }
             }
             reader.Close();
-            Connexion.con.Close();
-            return DictionaryToObject<T>(dico);
+
+            return DictionaryToObject(dico);
         }
 
-        
+
         ////////////////////////////////////////////
-     
+
         public int delete()
         {
-            int rowsAffected = 0;
-            String sql = "DELETE from " + this.GetType().Name + " where id = @id";
+            string req = "DELETE from " + this.GetType().Name + " where id = "+id;
 
-
-            //open connexion using Connexion class
-            Connexion.Connect();
-
-            //create command object using IDbCommand interface
-            //and the opened connection object
-            IDbCommand cmd = Connexion.con.CreateCommand();
-            cmd.CommandText = sql;
-
-            //add id parameter to command
-            IDbDataParameter param = cmd.CreateParameter();
-            param.ParameterName = "@id";
-            param.Value = id;
-
-            //add param to cmd object
-            cmd.Parameters.Add(param);
-
-            //execute the delete query and get the number of deleted rows
-            rowsAffected = cmd.ExecuteNonQuery();
-
-            Connexion.con.Close();
-            return rowsAffected;
+            //execute query and read data with IDataReader
+            return Connexion.IUD(req);
         }
 
         ////////////////////////////////////
 
         public List<dynamic> All()
+        {
+            List<dynamic> L = new List<dynamic>();
+            sql = "select * from" + GetType().Name;
+            IDataReader reader = Connexion.Select(sql);
+            while (reader.Read())
+            {
+                Dictionary<string, object> dico = new Dictionary<string, object>();
+
+                for (int i = 0; i < reader.FieldCount; i++)
+                    dico.Add(reader.GetName(i), reader.GetValue(i));
+
+                L.Add(dico);
+            }
+            reader.Close();
+            return L;
+        }
+        /*public List<dynamic> All()
         {
             List<dynamic> records = new List<dynamic>();
 
@@ -284,6 +242,6 @@ namespace DB
                 }
             }
             return records;
-        }
+        }*/
     }
 }

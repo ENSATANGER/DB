@@ -11,10 +11,11 @@ using System.Threading.Tasks;
 
 namespace DB
 {
-    abstract class Model
+    public abstract class Model
     {
         public int id = 0;
         private string sql = "";
+
 
         Dictionary<string, T> ObjectToDictionary<T>(object obj)
         {

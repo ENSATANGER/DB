@@ -11,10 +11,11 @@ using System.Threading.Tasks;
 
 namespace DB
 {
-    abstract class Model
+    public abstract class Model
     {
         public int id = 0;
         private string sql = "";
+
 
         Dictionary<string, T> ObjectToDictionary<T>(object obj)
         {
@@ -146,7 +147,7 @@ namespace DB
             //execute query and read data with IDataReader
             IDataReader reader = Connexion.Select(req);
 
-            // loop through columns and rows to add the name and value to disco
+            // loop through columns and rows to add the name and value to dico
             if (reader != null)
             {
                 for(int i=0; i< reader.FieldCount; i++)
@@ -159,7 +160,6 @@ namespace DB
         }
 
 
-        ////////////////////////////////////////////
 
         public int delete()
         {
@@ -169,7 +169,6 @@ namespace DB
             return Connexion.IUD(req);
         }
 
-        ////////////////////////////////////
 
         public List<dynamic> All()
         {

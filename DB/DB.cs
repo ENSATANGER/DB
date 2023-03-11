@@ -14,46 +14,58 @@ namespace DB
         static IDbCommand cmd = null;
         public static void Connect()
         {
-            try
+            if (con == null) 
             {
-                con = new SqlConnection("Data Source=DESKTOP-9UQDINE;Initial Catalog=ENSA_TANGER;Integrated Security=True");
+                try
+                {
+                    con = new SqlConnection("Data Source=DESKTOP-9UQDINE;Initial Catalog=ENSA_TANGER;Integrated Security=True");
 
-            }
-            catch (Exception ex)
-            {
-                //MySql CNX!!!!!!!!!
+                }
+                catch (Exception ex)
+                {
+                    //MySql CNX!!!!!!!!!
+                }
             }
         }
         public static int IUD(string req)
         {
+            Connect();
+            con.Open();
             try
             {
                 cmd = con.CreateCommand();
                 cmd.CommandText = req;
+                con.Close();
                 return cmd.ExecuteNonQuery();
-
             }
             catch (Exception ex)
             {
+                con.Close();
                 return 0;
             }
+            
         }
         public static IDataReader Select(string req)
         {
+            Connect();
+            con.Open();
             try
             {
                 cmd = con.CreateCommand();
                 cmd.CommandText = req;
+                con.Close();
                 return cmd.ExecuteReader();
-
             }
             catch (Exception ex)
             {
+                con.Close();
                 return null;//return (IDataReader)ex;?????????
             }
         }
         public static Dictionary<string, string> getChamps_table(string table)
         {
+            Connect();
+            con.Open();
             Dictionary<string, string> champs = new Dictionary<string, string>();
             try
             {
@@ -68,10 +80,12 @@ namespace DB
                     champs.Add("Champs " + (i + 1), dr.GetString(i));
                     i++;
                 }
+                con.Close();
                 return champs;
             }
             catch (Exception ex)
             {
+                con.Close();
                 return null;//return (IDataReader)ex;?????????
             }
 

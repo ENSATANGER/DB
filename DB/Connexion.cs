@@ -18,7 +18,7 @@ namespace DB
             {
                 try
                 {
-                    con = new SqlConnection("Data Source=DESKTOP-9UQDINE;Initial Catalog=ENSA_TANGER;Integrated Security=True");
+                    con = new SqlConnection("Data Source=localhost;Initial Catalog=ENSAT_TANGER;Integrated Security=True");
 
                 }
                 catch (Exception ex)
@@ -53,8 +53,8 @@ namespace DB
             {
                 cmd = con.CreateCommand();
                 cmd.CommandText = req;
-                con.Close();
-                return cmd.ExecuteReader();
+                IDataReader rd = cmd.ExecuteReader();
+                return rd;
             }
             catch (Exception ex)
             {

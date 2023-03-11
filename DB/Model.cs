@@ -161,7 +161,6 @@ namespace DB
         }
 
 
-
         public int delete()
         {
             string req = "DELETE from " + this.GetType().Name + " where id = "+id;
@@ -174,8 +173,9 @@ namespace DB
         public List<dynamic> All()
         {
             List<dynamic> L = new List<dynamic>();
-            sql = "select * from" + GetType().Name;
+            sql = "select * from " + GetType().Name;
             IDataReader reader = Connexion.Select(sql);
+            
             while (reader.Read())
             {
                 Dictionary<string, object> dico = new Dictionary<string, object>();
@@ -185,7 +185,6 @@ namespace DB
 
                 L.Add(DictionaryToObject(dico));
             }
-            reader.Close();
             return L;
         }
         /*public List<dynamic> All()
@@ -245,6 +244,11 @@ namespace DB
         {
             var obj = (T)Activator.CreateInstance(typeof(T));
             return obj.Select(dico);
+        }
+
+        public override string ToString()
+        {
+            return "ID : "+id;
         }
     }
 }

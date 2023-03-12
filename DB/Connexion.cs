@@ -14,12 +14,13 @@ namespace DB
         static IDbCommand cmd = null;
         public static void Connect()
         {
-            if (con == null) 
+            if (con == null)
             {
                 try
                 {
-                    con = new SqlConnection("Data Source=localhost;Initial Catalog=ENSAT_TANGER;Integrated Security=True");
-
+                    con = new SqlConnection("Data Source=localhost;Initial Catalog=ENSA_TANGER;Integrated Security=True");
+                    if (con.State.ToString() == "Closed")
+                        con.Open();
                 }
                 catch (Exception ex)
                 {
@@ -30,70 +31,39 @@ namespace DB
         public static int IUD(string req)
         {
             Connect();
-            con.Open();
-            try
-            {
-                cmd = con.CreateCommand();
-                cmd.CommandText = req;
-                int nb = cmd.ExecuteNonQuery();
-                con.Close();
-                return nb;
-            }
-            catch (Exception ex)
-            {
-                con.Close();
-                return 0;
-            }
-            
+            cmd = con.CreateCommand();
+            cmd.CommandText = req;
+            return cmd.ExecuteNonQuery();
         }
+
         public static IDataReader Select(string req)
         {
             Connect();
-            con.Open();
-            try
-            {
-                cmd = con.CreateCommand();
-                cmd.CommandText = req;
-                IDataReader rd = cmd.ExecuteReader();
-                con.Close();
-                return rd;
-            }
-            catch (Exception ex)
-            {
-                con.Close();
-                return null;//return (IDataReader)ex;?????????
-            }
+            cmd = con.CreateCommand();
+            cmd.CommandText = req;
+            IDataReader rd = cmd.ExecuteReader();
+            return rd;
         }
-        public static Dictionary<string, string> getChamps_table(string table)
+         public static Dictionary<string, string> getChamps_table(string table)
         {
             Connect();
-            con.Open();
             Dictionary<string, string> champs = new Dictionary<string, string>();
-            try
+            string req = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @table;";
+            cmd = new SqlCommand(req);
+            cmd.Connection = con;
+            var parameter = cmd.CreateParameter();
+            parameter.ParameterName = "@table";
+            parameter.Value = table;
+            cmd.Parameters.Add(parameter);
+            IDataReader dr = cmd.ExecuteReader();
+            int i = 0;
+            while (dr.Read())
             {
-                string req = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @table;";
-                cmd = new SqlCommand(req);
-                cmd.Connection = con;
-                var parameter = cmd.CreateParameter();
-                parameter.ParameterName = "@table";
-                parameter.Value = table;
-                cmd.Parameters.Add(parameter); 
-                IDataReader dr = cmd.ExecuteReader();
-                int i = 0;
-                while (dr.Read())
-                {
-                    champs.Add("Champs " + (i + 1), dr.GetString(0));
-                    i++;
-                }
-                
-                con.Close();
-                return champs;
+                champs.Add("Champs " + (i + 1), dr.GetString(0));
+                i++;
             }
-            catch (Exception ex)
-            {
-                con.Close();
-                return null;//return (IDataReader)ex;?????????
-            }
+            dr.Close();
+            return champs;
 
         }
     }

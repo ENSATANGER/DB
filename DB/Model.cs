@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Dynamic;
 using System.Linq;
 using System.Net.Cache;
+using System.Reflection;
 using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using System.Text;
+using Newtonsoft.Json;
 using System.Threading.Tasks;
 
 
@@ -18,26 +21,23 @@ namespace DB
         private string sql = "";
 
 
-        Dictionary<string, T> ObjectToDictionary<T>(object obj)
+        public Dictionary<string, T> ObjectToDictionary<T>(object obj)
         {
-            Dictionary<string, T> keyValues = new Dictionary<string, T>();
-            var properties = obj.GetType().GetProperties();
-            foreach (var property in properties)
-            {
-                keyValues.Add(property.Name, (T)property.GetValue(obj));
-            }
-            return keyValues;
+            var json = JsonConvert.SerializeObject(obj);
+            var dico = JsonConvert.DeserializeObject<Dictionary<string, T>>(json);
+            return dico;
         }
 
-        private static dynamic DictionaryToObject(Dictionary<string, object> dico)
+        public dynamic DictionaryToObject(Dictionary<string, object> dico)
         {
-            dynamic obj = new ExpandoObject();
-            var dictonary = (IDictionary<string, object>)obj;
-            foreach (KeyValuePair<string, object> kvp in dico)
+            var model = Activator.CreateInstance(GetType());
+            PropertyInfo[] properties = GetType().GetProperties();
+
+            foreach (var property in properties)
             {
-                dictonary.Add(kvp.Key, kvp.Value);
+               property.SetValue(model, dico[property.Name]);
             }
-            return obj;
+            return model;
         }
 
         public int save()
@@ -45,13 +45,13 @@ namespace DB
             Dictionary<string, string> dico = new Dictionary<string, string>();
             dico = ObjectToDictionary<string>(this);
 
-            Dictionary<string, string> ChampsTable = Connexion.getChamps_table(this.GetType().Name);
+            Dictionary<string, string> ChampsTable = Connexion.getChamps_table(GetType().Name);
 
-            if (this.id == 0)
+            if (id == 0)
             {
                 StringBuilder sqlBuilder = new StringBuilder();
                 sqlBuilder.Append("INSERT INTO ");
-                sqlBuilder.Append(this.GetType().Name);
+                sqlBuilder.Append(GetType().Name);
                 sqlBuilder.Append("(");
 
                 int c = 0;
@@ -68,20 +68,21 @@ namespace DB
                 sqlBuilder.Append(")");
                 sqlBuilder.Append(" VALUES (");
 
-                c = -1;
+                c = 0;
                 foreach (KeyValuePair<string, string> kvp in dico)
                 {
-                    if (c != -1) // ignorer valeur de l'id
+                    if (kvp.Key != "id")
                     {
                         if (c > 0)
                             sqlBuilder.Append(",");
                         sqlBuilder.Append("'");
-                        sqlBuilder.Append(kvp.Key);
+                        sqlBuilder.Append(kvp.Value);
                         sqlBuilder.Append("'");
                     }
                     c++;
                 }
                 sqlBuilder.Append(")");
+                sqlBuilder.Append(";");
 
                 sql = sqlBuilder.ToString();
             }
@@ -110,13 +111,13 @@ namespace DB
                 }
                 sqlBuilder.Append("WHERE id = ");
                 sqlBuilder.Append(id);
+                sqlBuilder.Append(";");
 
                 sql = sqlBuilder.ToString();
             }
-
+            
             if (Connexion.IUD(sql) != 0)
                 return 0;
-
             return -1; // cas d'erreur
         }
 
@@ -128,22 +129,25 @@ namespace DB
 
             IDataReader data = Connexion.Select(sql);
 
-            for (int i = 0; i < data.FieldCount; i++)
-
+            int i = 0;
+            while (data.Read())
+            {
                 dico.Add(data.GetName(i), data.GetValue(i));
-
+                i++;
+            }
+            data.Close();
             return DictionaryToObject(dico);
         }
 
-       
+
 
         //louay's contribution
 
-        public static dynamic find<T>(int id)
+        public dynamic find<T>(int id)
         {
             Dictionary<string, object> dico = new Dictionary<string, object>();
 
-             string req = "select * from " + typeof(T).Name + " where id =" + id;
+            string req = "select * from " + typeof(T).Name + " where id =" + id;
 
             //execute query and read data with IDataReader
             IDataReader reader = Connexion.Select(req);
@@ -151,7 +155,7 @@ namespace DB
             // loop through columns and rows to add the name and value to dico
             if (reader != null)
             {
-                for(int i=0; i< reader.FieldCount; i++)
+                for (int i = 0; i < reader.FieldCount; i++)
                 {
                     dico.Add(reader.GetName(i), reader.GetValue(i));
                 }
@@ -163,7 +167,7 @@ namespace DB
 
         public int delete()
         {
-            string req = "DELETE from " + this.GetType().Name + " where id = "+id;
+            string req = "DELETE from " + this.GetType().Name + " where id = " + id;
 
             //execute query and read data with IDataReader
             return Connexion.IUD(req);
@@ -175,7 +179,7 @@ namespace DB
             List<dynamic> L = new List<dynamic>();
             sql = "select * from " + GetType().Name;
             IDataReader reader = Connexion.Select(sql);
-            
+
             while (reader.Read())
             {
                 Dictionary<string, object> dico = new Dictionary<string, object>();
@@ -190,7 +194,6 @@ namespace DB
         /*public List<dynamic> All()
         {
             List<dynamic> records = new List<dynamic>();
-
             // Execute a query to retrieve all records for the table
             string query = $"SELECT * FROM {GetTableName()}";
             
@@ -248,7 +251,7 @@ namespace DB
 
         public override string ToString()
         {
-            return "ID : "+id;
+            return "ID : " + id;
         }
     }
 }

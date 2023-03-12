@@ -50,10 +50,7 @@ namespace DB
         {
             Dictionary<string, string> dico = new Dictionary<string, string>();
             dico = ObjectToDictionary<string>(this);
-            foreach (KeyValuePair<string, string> kvp in dico)
-                Console.WriteLine(kvp.Value);    
 
-            return 0;
             Dictionary<string, string> ChampsTable = Connexion.getChamps_table(this.GetType().Name);
 
             if (this.id == 0)
@@ -122,7 +119,7 @@ namespace DB
 
                 sql = sqlBuilder.ToString();
             }
-            Console.WriteLine(sql);
+
             if (Connexion.IUD(sql) != 0)
                 return 0;
 

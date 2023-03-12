@@ -31,63 +31,39 @@ namespace DB
         public static int IUD(string req)
         {
             Connect();
-            try
-            {
-                cmd = con.CreateCommand();
-                cmd.CommandText = req;
-                return cmd.ExecuteNonQuery();
-            }
-            catch (Exception ex)
-            {
-                con.Close();
-                return 0;
-            }
-
+            cmd = con.CreateCommand();
+            cmd.CommandText = req;
+            return cmd.ExecuteNonQuery();
         }
+
         public static IDataReader Select(string req)
         {
             Connect();
-            try
-            {
-                cmd = con.CreateCommand();
-                cmd.CommandText = req;
-                IDataReader rd = cmd.ExecuteReader();
-                return rd;
-            }
-            catch (Exception ex)
-            {
-                con.Close();
-                return null;//return (IDataReader)ex;?????????
-            }
+            cmd = con.CreateCommand();
+            cmd.CommandText = req;
+            IDataReader rd = cmd.ExecuteReader();
+            return rd;
         }
         public static Dictionary<string, string> getChamps_table(string table)
         {
             Connect();
             Dictionary<string, string> champs = new Dictionary<string, string>();
-            try
+            string req = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @table;";
+            cmd = new SqlCommand(req);
+            cmd.Connection = con;
+            var parameter = cmd.CreateParameter();
+            parameter.ParameterName = "@table";
+            parameter.Value = table;
+            cmd.Parameters.Add(parameter);
+            IDataReader dr = cmd.ExecuteReader();
+            int i = 0;
+            while (dr.Read())
             {
-                string req = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @table;";
-                cmd = new SqlCommand(req);
-                cmd.Connection = con;
-                var parameter = cmd.CreateParameter();
-                parameter.ParameterName = "@table";
-                parameter.Value = table;
-                cmd.Parameters.Add(parameter);
-                IDataReader dr = cmd.ExecuteReader();
-                int i = 0;
-                while (dr.Read())
-                {
-                    champs.Add("Champs " + (i + 1), dr.GetString(0));
-                    i++;
-                }
-
-                return champs;
+                champs.Add("Champs " + (i + 1), dr.GetString(0));
+                i++;
             }
-            catch (Exception ex)
-            {
-                con.Close();
-                return null;//return (IDataReader)ex;?????????
-            }
+            dr.Close();
+            return champs;
 
         }
     }

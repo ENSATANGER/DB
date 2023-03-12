@@ -14,12 +14,13 @@ namespace DB
         static IDbCommand cmd = null;
         public static void Connect()
         {
-            if (con == null) 
+            if (con == null)
             {
                 try
                 {
-                    con = new SqlConnection("Data Source=localhost;Initial Catalog=ENSAT_TANGER;Integrated Security=True");
-
+                    con = new SqlConnection("Data Source=localhost;Initial Catalog=ENSA_TANGER;Integrated Security=True");
+                    if (con.State.ToString() == "Closed")
+                        con.Open();
                 }
                 catch (Exception ex)
                 {
@@ -30,32 +31,27 @@ namespace DB
         public static int IUD(string req)
         {
             Connect();
-            con.Open();
             try
             {
                 cmd = con.CreateCommand();
                 cmd.CommandText = req;
-                int nb = cmd.ExecuteNonQuery();
-                con.Close();
-                return nb;
+                return cmd.ExecuteNonQuery();
             }
             catch (Exception ex)
             {
                 con.Close();
                 return 0;
             }
-            
+
         }
         public static IDataReader Select(string req)
         {
             Connect();
-            con.Open();
             try
             {
                 cmd = con.CreateCommand();
                 cmd.CommandText = req;
                 IDataReader rd = cmd.ExecuteReader();
-                con.Close();
                 return rd;
             }
             catch (Exception ex)
@@ -67,22 +63,24 @@ namespace DB
         public static Dictionary<string, string> getChamps_table(string table)
         {
             Connect();
-            con.Open();
             Dictionary<string, string> champs = new Dictionary<string, string>();
             try
             {
-                string req = "SELECT COLUMN_NAME\r\nFROM INFORMATION_SCHEMA.COLUMNS\r\nWHERE TABLE_NAME = '@table';";
+                string req = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @table;";
                 cmd = new SqlCommand(req);
                 cmd.Connection = con;
-                cmd.Parameters.Add(new SqlParameter("@table", table));
+                var parameter = cmd.CreateParameter();
+                parameter.ParameterName = "@table";
+                parameter.Value = table;
+                cmd.Parameters.Add(parameter);
                 IDataReader dr = cmd.ExecuteReader();
                 int i = 0;
-                while (dr != null)
+                while (dr.Read())
                 {
-                    champs.Add("Champs " + (i + 1), dr.GetString(i));
+                    champs.Add("Champs " + (i + 1), dr.GetString(0));
                     i++;
                 }
-                con.Close();
+
                 return champs;
             }
             catch (Exception ex)

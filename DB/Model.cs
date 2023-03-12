@@ -115,8 +115,6 @@ namespace DB
 
                 sql = sqlBuilder.ToString();
             }
-            Console.WriteLine(sql);
-            Console.WriteLine(Connexion.IUD(sql));
             
             if (Connexion.IUD(sql) != 0)
                 return 0;

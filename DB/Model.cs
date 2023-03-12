@@ -35,13 +35,7 @@ namespace DB
 
             foreach (var property in properties)
             {
-                if (property.PropertyType.Name == "long")
-                {
-                    property.SetValue(model, (int)dico[property.Name]);
-                }
-                else
-                    property.SetValue(model, dico[property.Name]);
-
+               property.SetValue(model, dico[property.Name]);
             }
             return model;
         }
@@ -51,13 +45,13 @@ namespace DB
             Dictionary<string, string> dico = new Dictionary<string, string>();
             dico = ObjectToDictionary<string>(this);
 
-            Dictionary<string, string> ChampsTable = Connexion.getChamps_table(this.GetType().Name);
+            Dictionary<string, string> ChampsTable = Connexion.getChamps_table(GetType().Name);
 
-            if (this.id == 0)
+            if (id == 0)
             {
                 StringBuilder sqlBuilder = new StringBuilder();
                 sqlBuilder.Append("INSERT INTO ");
-                sqlBuilder.Append(this.GetType().Name);
+                sqlBuilder.Append(GetType().Name);
                 sqlBuilder.Append("(");
 
                 int c = 0;
@@ -74,20 +68,21 @@ namespace DB
                 sqlBuilder.Append(")");
                 sqlBuilder.Append(" VALUES (");
 
-                c = -1;
+                c = 0;
                 foreach (KeyValuePair<string, string> kvp in dico)
                 {
-                    if (c != -1) // ignorer valeur de l'id
+                    if (kvp.Key != "id")
                     {
                         if (c > 0)
                             sqlBuilder.Append(",");
                         sqlBuilder.Append("'");
-                        sqlBuilder.Append(kvp.Key);
+                        sqlBuilder.Append(kvp.Value);
                         sqlBuilder.Append("'");
                     }
                     c++;
                 }
                 sqlBuilder.Append(")");
+                sqlBuilder.Append(";");
 
                 sql = sqlBuilder.ToString();
             }
@@ -116,13 +111,15 @@ namespace DB
                 }
                 sqlBuilder.Append("WHERE id = ");
                 sqlBuilder.Append(id);
+                sqlBuilder.Append(";");
 
                 sql = sqlBuilder.ToString();
             }
-
+            Console.WriteLine(sql);
+            Console.WriteLine(Connexion.IUD(sql));
+            
             if (Connexion.IUD(sql) != 0)
                 return 0;
-
             return -1; // cas d'erreur
         }
 

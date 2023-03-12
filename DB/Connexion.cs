@@ -69,17 +69,21 @@ namespace DB
             Dictionary<string, string> champs = new Dictionary<string, string>();
             try
             {
-                string req = "SELECT COLUMN_NAME\r\nFROM INFORMATION_SCHEMA.COLUMNS\r\nWHERE TABLE_NAME = '@table';";
+                string req = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @table;";
                 cmd = new SqlCommand(req);
                 cmd.Connection = con;
-                cmd.Parameters.Add(new SqlParameter("@table", table));
+                var parameter = cmd.CreateParameter();
+                parameter.ParameterName = "@table";
+                parameter.Value = table;
+                cmd.Parameters.Add(parameter); 
                 IDataReader dr = cmd.ExecuteReader();
                 int i = 0;
-                while (dr != null)
+                while (dr.Read())
                 {
-                    champs.Add("Champs " + (i + 1), dr.GetString(i));
+                    champs.Add("Champs " + (i + 1), dr.GetString(0));
                     i++;
                 }
+                
                 con.Close();
                 return champs;
             }

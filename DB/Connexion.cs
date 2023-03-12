@@ -35,8 +35,9 @@ namespace DB
             {
                 cmd = con.CreateCommand();
                 cmd.CommandText = req;
+                int nb = cmd.ExecuteNonQuery();
                 con.Close();
-                return cmd.ExecuteNonQuery();
+                return nb;
             }
             catch (Exception ex)
             {
@@ -54,6 +55,7 @@ namespace DB
                 cmd = con.CreateCommand();
                 cmd.CommandText = req;
                 IDataReader rd = cmd.ExecuteReader();
+                con.Close();
                 return rd;
             }
             catch (Exception ex)

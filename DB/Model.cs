@@ -234,9 +234,18 @@ namespace DB
             List<dynamic> L = new List<dynamic>();
 
             sql = "select * from " + GetType().Name + " where ";
+            int c = 0;
             foreach (KeyValuePair<string, object> e in dico)
-                sql += e.Key + "=" + e.Value;
-
+            {
+                if(e.Value != null)
+                    {
+                    if(c > 0)
+                        sql += " and ";
+                    sql += e.Key + "=" + e.Value;
+                    c++;
+                }
+            }
+           
             IDataReader reader = Connexion.Select(sql);
 
             while (reader.Read())

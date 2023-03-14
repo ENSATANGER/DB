@@ -241,21 +241,28 @@ namespace DB
                     {
                     if(c > 0)
                         sql += " and ";
-                    sql += e.Key + "=" + e.Value;
+                    sql += e.Key + "='" + e.Value+"';";
                     c++;
                 }
             }
+            Console.WriteLine(sql);
            
             IDataReader reader = Connexion.Select(sql);
 
             while (reader.Read())
             {
+                dico.Clear();
                 for (int i = 0; i < reader.FieldCount; i++)
-                    dico.Add(reader.GetName(i), reader.GetValue(i));
+                {
+                   dico.Add(reader.GetName(i), reader.GetValue(i));
+                }
 
                 L.Add(DictionaryToObject(dico));
-            }
-            reader.Close();
+                
+
+                }
+                reader.Close();
+           
             return L;
         }
         public static List<dynamic> select<T>(Dictionary<string, object> dico) where T : Model

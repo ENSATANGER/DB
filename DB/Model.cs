@@ -70,7 +70,7 @@ namespace DB
                 sqlBuilder.Append(")");
                 sqlBuilder.Append(" VALUES (");
 
-                c = 0;
+                c = -1;
                 foreach (KeyValuePair<string, string> kvp in dico)
                 {
                     if (kvp.Key != "id")
@@ -87,6 +87,7 @@ namespace DB
                 sqlBuilder.Append(";");
 
                 sql = sqlBuilder.ToString();
+
             }
             else
             {

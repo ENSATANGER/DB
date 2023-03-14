@@ -168,7 +168,6 @@ namespace DB
         public int delete()
         {
             string req = "DELETE from " + this.GetType().Name + " where id = " + id;
-
             //execute query and read data with IDataReader
             return Connexion.IUD(req);
         }

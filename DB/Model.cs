@@ -35,8 +35,10 @@ namespace DB
 
             foreach (var property in properties)
             {
-               property.SetValue(model, dico[property.Name]);
+                if (dico.Keys.Contains(property.Name))
+                    property.SetValue(model, dico[property.Name]);
             }
+            
             return model;
         }
 
@@ -68,7 +70,7 @@ namespace DB
                 sqlBuilder.Append(")");
                 sqlBuilder.Append(" VALUES (");
 
-                c = 0;
+                c = -1;
                 foreach (KeyValuePair<string, string> kvp in dico)
                 {
                     if (kvp.Key != "id")
@@ -85,6 +87,7 @@ namespace DB
                 sqlBuilder.Append(";");
 
                 sql = sqlBuilder.ToString();
+
             }
             else
             {
@@ -128,12 +131,13 @@ namespace DB
             sql = "select * from " + this.GetType().Name + " where id=" + id;
 
             IDataReader data = Connexion.Select(sql);
-
-            int i = 0;
+            
             while (data.Read())
             {
-                dico.Add(data.GetName(i), data.GetValue(i));
-                i++;
+                for (int i = 0; i < data.FieldCount; i++)
+                {
+                    dico.Add(data.GetName(i), data.GetValue(i));
+                }
             }
             data.Close();
             return DictionaryToObject(dico);

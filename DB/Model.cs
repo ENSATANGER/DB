@@ -118,9 +118,11 @@ namespace DB
 
                 sql = sqlBuilder.ToString();
             }
-            
-            if (Connexion.IUD(sql) != 0)
+            int v = Connexion.IUD(sql);
+            if (v != 0 && v!= -1)
                 return 0;
+            if (v == -1)
+                return -2;// Exception from UID
             return -1; // cas d'erreur
         }
 

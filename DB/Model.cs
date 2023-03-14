@@ -118,9 +118,11 @@ namespace DB
 
                 sql = sqlBuilder.ToString();
             }
-            
-            if (Connexion.IUD(sql) != 0)
+            int v = Connexion.IUD(sql);
+            if (v != 0 && v!= -1)
                 return 0;
+            if (v == -1)
+                return -2;// Exception from UID
             return -1; // cas d'erreur
         }
 
@@ -231,9 +233,18 @@ namespace DB
             List<dynamic> L = new List<dynamic>();
 
             sql = "select * from " + GetType().Name + " where ";
+            int c = 0;
             foreach (KeyValuePair<string, object> e in dico)
-                sql += e.Key + "=" + e.Value;
-
+            {
+                if(e.Value != null)
+                    {
+                    if(c > 0)
+                        sql += " and ";
+                    sql += e.Key + "=" + e.Value;
+                    c++;
+                }
+            }
+           
             IDataReader reader = Connexion.Select(sql);
 
             while (reader.Read())

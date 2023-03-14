@@ -31,9 +31,14 @@ namespace DB
         public static int IUD(string req)
         {
             Connect();
-            cmd = con.CreateCommand();
-            cmd.CommandText = req;
-            return cmd.ExecuteNonQuery();
+            try{
+                cmd = con.CreateCommand();
+                cmd.CommandText = req;
+                return cmd.ExecuteNonQuery();
+            }
+            catch(SqlException ex){
+                return -1;
+            }
         }
 
         public static IDataReader Select(string req)

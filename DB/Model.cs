@@ -17,10 +17,14 @@ namespace DB
 {
     public abstract class Model
     {
-        public int id = 0;
+        private int Id = 0;
         private string sql = "";
 
-
+        public int id
+        {
+            get { return Id; }
+            set { Id = value; }
+        }
         public Dictionary<string, T> ObjectToDictionary<T>(object obj)
         {
             var json = JsonConvert.SerializeObject(obj);
@@ -49,7 +53,7 @@ namespace DB
 
             Dictionary<string, string> ChampsTable = Connexion.getChamps_table(GetType().Name);
 
-            if (id == 0)
+            if (Id == 0)
             {
                 StringBuilder sqlBuilder = new StringBuilder();
                 sqlBuilder.Append("INSERT INTO ");
@@ -113,7 +117,7 @@ namespace DB
                     }
                 }
                 sqlBuilder.Append("WHERE id = ");
-                sqlBuilder.Append(id);
+                sqlBuilder.Append(Id);
                 sqlBuilder.Append(";");
 
                 sql = sqlBuilder.ToString();
@@ -130,7 +134,7 @@ namespace DB
         {
             Dictionary<string, object> dico = new Dictionary<string, object>();
 
-            sql = "select * from " + this.GetType().Name + " where id=" + id;
+            sql = "select * from " + this.GetType().Name + " where id=" + Id;
 
             IDataReader data = Connexion.Select(sql);
 
@@ -153,7 +157,7 @@ namespace DB
         {
             Dictionary<string, object> dico = new Dictionary<string, object>();
 
-            string req = "select * from " + typeof(T).Name + " where id =" + id;
+            string req = "select * from " + typeof(T).Name + " where id =" + Id;
 
             //execute query and read data with IDataReader
             IDataReader reader = Connexion.Select(req);
@@ -173,7 +177,7 @@ namespace DB
 
         public int delete()
         {
-            string req = "DELETE from " + this.GetType().Name + " where id = " + id;
+            string req = "DELETE from " + this.GetType().Name + " where id = " + Id;
 
             //execute query and read data with IDataReader
             return Connexion.IUD(req);
@@ -245,7 +249,6 @@ namespace DB
                     c++;
                 }
             }
-            Console.WriteLine(sql);
 
             IDataReader reader = Connexion.Select(sql);
 
@@ -273,7 +276,7 @@ namespace DB
 
         public override string ToString()
         {
-            return "ID : " + id;
+            return "ID : " + Id;
         }
     }
 }

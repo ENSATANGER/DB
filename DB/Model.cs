@@ -17,10 +17,14 @@ namespace DB
 {
     public abstract class Model
     {
-        public int id = 0;
+        private int Id = 0;
         private string sql = "";
 
-
+        public int id
+        {
+            get { return Id; }
+            set { Id = value; }
+        }
         public Dictionary<string, T> ObjectToDictionary<T>(object obj)
         {
             var json = JsonConvert.SerializeObject(obj);
@@ -35,8 +39,10 @@ namespace DB
 
             foreach (var property in properties)
             {
-               property.SetValue(model, dico[property.Name]);
+                if (dico.Keys.Contains(property.Name))
+                    property.SetValue(model, dico[property.Name]);
             }
+
             return model;
         }
 
@@ -47,7 +53,7 @@ namespace DB
 
             Dictionary<string, string> ChampsTable = Connexion.getChamps_table(GetType().Name);
 
-            if (id == 0)
+            if (Id == 0)
             {
                 StringBuilder sqlBuilder = new StringBuilder();
                 sqlBuilder.Append("INSERT INTO ");
@@ -85,6 +91,7 @@ namespace DB
                 sqlBuilder.Append(";");
 
                 sql = sqlBuilder.ToString();
+            
             }
             else
             {
@@ -95,28 +102,40 @@ namespace DB
 
                 int c = 0;
                 // work with two dictionaries at the same time
-                foreach (var pair in ChampsTable.Zip(dico, (champ, newvalue) => new { Champ = champ, NewValue = newvalue }))
+                foreach (var Champ in ChampsTable)
                 {
-                    if (pair.Champ.Value != "id")
+                    if (Champ.Value != "id")
                     {
                         if (c > 0)
                             sqlBuilder.Append(",");
-                        sqlBuilder.Append(pair.Champ.Value);
-                        sqlBuilder.Append("=");
-                        sqlBuilder.Append("'");
-                        sqlBuilder.Append(pair.NewValue.Value);
-                        sqlBuilder.Append("'");
+                        foreach(var val in dico)
+                        {
+                            if(Champ.Value == val.Key)
+                            {
+                                sqlBuilder.Append(Champ.Value);
+                                sqlBuilder.Append("=");
+                                sqlBuilder.Append("'");
+                                sqlBuilder.Append(val.Value);
+                                sqlBuilder.Append("' ");
+
+                            }
+                        }
                         c++;
                     }
                 }
                 sqlBuilder.Append("WHERE id = ");
-                sqlBuilder.Append(id);
+                sqlBuilder.Append(Id);
                 sqlBuilder.Append(";");
 
                 sql = sqlBuilder.ToString();
+
             }
-            if (Connexion.IUD(sql) != 0)
+
+            int v = Connexion.IUD(sql);
+            if (v != 0 && v != -1)
                 return 0;
+            if (v == -1)
+                return -2;// Exception from UID
             return -1; // cas d'erreur
         }
 
@@ -124,15 +143,16 @@ namespace DB
         {
             Dictionary<string, object> dico = new Dictionary<string, object>();
 
-            sql = "select * from " + this.GetType().Name + " where id=" + id;
+            sql = "select * from " + this.GetType().Name + " where id=" + Id;
 
             IDataReader data = Connexion.Select(sql);
 
-            int i = 0;
             while (data.Read())
             {
-                dico.Add(data.GetName(i), data.GetValue(i));
-                i++;
+                for (int i = 0; i < data.FieldCount; i++)
+                {
+                    dico.Add(data.GetName(i), data.GetValue(i));
+                }
             }
             data.Close();
             return DictionaryToObject(dico);
@@ -147,12 +167,13 @@ namespace DB
             var obj = (T)Activator.CreateInstance(typeof(T));
             obj.id = id;
             return obj.find();
+
         }
 
 
         public int delete()
         {
-            string req = "DELETE from " + this.GetType().Name + " where id = " + id;
+            string req = "DELETE from " + this.GetType().Name + " where id = " + Id;
 
             //execute query and read data with IDataReader
             return Connexion.IUD(req);
@@ -213,19 +234,33 @@ namespace DB
             List<dynamic> L = new List<dynamic>();
 
             sql = "select * from " + GetType().Name + " where ";
+            int c = 0;
             foreach (KeyValuePair<string, object> e in dico)
-                sql += e.Key + "=" + e.Value;
-
+            {
+                if (e.Value != null)
+                {
+                    if (c > 0)
+                        sql += " and ";
+                    sql += e.Key + "='" + e.Value + "';";
+                    c++;
+                }
+            }
             IDataReader reader = Connexion.Select(sql);
 
             while (reader.Read())
             {
+                dico.Clear();
                 for (int i = 0; i < reader.FieldCount; i++)
+                {
                     dico.Add(reader.GetName(i), reader.GetValue(i));
+                }
 
                 L.Add(DictionaryToObject(dico));
+
+
             }
             reader.Close();
+
             return L;
         }
         public static List<dynamic> select<T>(Dictionary<string, object> dico) where T : Model
@@ -236,7 +271,7 @@ namespace DB
 
         public override string ToString()
         {
-            return "ID : " + id;
+            return "ID : " + Id;
         }
     }
 }

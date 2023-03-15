@@ -249,16 +249,23 @@ namespace DB
             int c = 0;
             foreach (KeyValuePair<string, object> e in dico)
             {
+                if (e.Key == "id")
+                {
+                    string s=""; s += e.Value;
+                    if (s == "0") continue;
+                }
+
                 if (e.Value != null)
                 {
                     if (c > 0)
                         sql += " and ";
-                    sql += e.Key + "='" + e.Value + "';";
+                    sql += e.Key + "='" + e.Value + "'";
                     c++;
                 }
             }
+            Console.WriteLine(sql);
             IDataReader reader = Connexion.Select(sql);
-
+            
             while (reader.Read())
             {
                 dico.Clear();

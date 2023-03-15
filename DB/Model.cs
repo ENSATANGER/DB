@@ -38,7 +38,7 @@ namespace DB
                 if (dico.Keys.Contains(property.Name))
                     property.SetValue(model, dico[property.Name]);
             }
-            
+
             return model;
         }
 
@@ -119,7 +119,7 @@ namespace DB
                 sql = sqlBuilder.ToString();
             }
             int v = Connexion.IUD(sql);
-            if (v != 0 && v!= -1)
+            if (v != 0 && v != -1)
                 return 0;
             if (v == -1)
                 return -2;// Exception from UID
@@ -133,7 +133,7 @@ namespace DB
             sql = "select * from " + this.GetType().Name + " where id=" + id;
 
             IDataReader data = Connexion.Select(sql);
-            
+
             while (data.Read())
             {
                 for (int i = 0; i < data.FieldCount; i++)
@@ -237,16 +237,16 @@ namespace DB
             int c = 0;
             foreach (KeyValuePair<string, object> e in dico)
             {
-                if(e.Value != null)
-                    {
-                    if(c > 0)
+                if (e.Value != null)
+                {
+                    if (c > 0)
                         sql += " and ";
-                    sql += e.Key + "='" + e.Value+"';";
+                    sql += e.Key + "='" + e.Value + "';";
                     c++;
                 }
             }
             Console.WriteLine(sql);
-           
+
             IDataReader reader = Connexion.Select(sql);
 
             while (reader.Read())
@@ -254,15 +254,15 @@ namespace DB
                 dico.Clear();
                 for (int i = 0; i < reader.FieldCount; i++)
                 {
-                   dico.Add(reader.GetName(i), reader.GetValue(i));
+                    dico.Add(reader.GetName(i), reader.GetValue(i));
                 }
 
                 L.Add(DictionaryToObject(dico));
-                
 
-                }
-                reader.Close();
-           
+
+            }
+            reader.Close();
+
             return L;
         }
         public static List<dynamic> select<T>(Dictionary<string, object> dico) where T : Model

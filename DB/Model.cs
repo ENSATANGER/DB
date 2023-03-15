@@ -74,7 +74,7 @@ namespace DB
                 sqlBuilder.Append(")");
                 sqlBuilder.Append(" VALUES (");
 
-                c = -1;
+                c = 0;
                 foreach (KeyValuePair<string, string> kvp in dico)
                 {
                     if (kvp.Key != "id")
@@ -91,7 +91,7 @@ namespace DB
                 sqlBuilder.Append(";");
 
                 sql = sqlBuilder.ToString();
-
+            
             }
             else
             {
@@ -102,17 +102,24 @@ namespace DB
 
                 int c = 0;
                 // work with two dictionaries at the same time
-                foreach (var pair in ChampsTable.Zip(dico, (champ, newvalue) => new { Champ = champ, NewValue = newvalue }))
+                foreach (var Champ in ChampsTable)
                 {
-                    if (pair.Champ.Value != "id")
+                    if (Champ.Value != "id")
                     {
                         if (c > 0)
                             sqlBuilder.Append(",");
-                        sqlBuilder.Append(pair.Champ.Value);
-                        sqlBuilder.Append("=");
-                        sqlBuilder.Append("'");
-                        sqlBuilder.Append(pair.NewValue.Value);
-                        sqlBuilder.Append("'");
+                        foreach(var val in dico)
+                        {
+                            if(Champ.Value == val.Key)
+                            {
+                                sqlBuilder.Append(Champ.Value);
+                                sqlBuilder.Append("=");
+                                sqlBuilder.Append("'");
+                                sqlBuilder.Append(val.Value);
+                                sqlBuilder.Append("' ");
+
+                            }
+                        }
                         c++;
                     }
                 }
@@ -121,6 +128,7 @@ namespace DB
                 sqlBuilder.Append(";");
 
                 sql = sqlBuilder.ToString();
+
             }
             int v = Connexion.IUD(sql);
             if (v != 0 && v != -1)

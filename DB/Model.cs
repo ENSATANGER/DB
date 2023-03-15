@@ -245,7 +245,7 @@ namespace DB
                     c++;
                 }
             }
-            Console.WriteLine(sql);
+            
            
             IDataReader reader = Connexion.Select(sql);
 
@@ -258,7 +258,6 @@ namespace DB
                 }
 
                 L.Add(DictionaryToObject(dico));
-                
 
                 }
                 reader.Close();

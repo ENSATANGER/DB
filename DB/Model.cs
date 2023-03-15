@@ -263,7 +263,7 @@ namespace DB
                     c++;
                 }
             }
-            Console.WriteLine(sql);
+           
             IDataReader reader = Connexion.Select(sql);
             
             while (reader.Read())

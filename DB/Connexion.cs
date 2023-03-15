@@ -18,15 +18,16 @@ namespace DB
             {
                 try
                 {
-                    con = new SqlConnection("Data Source=localhost;Initial Catalog=ENSA_TANGER;Integrated Security=True");
-                    if (con.State.ToString() == "Closed")
-                        con.Open();
+                    con = new SqlConnection("Data Source=localhost;Initial Catalog=ENSAT_TANGER;Integrated Security=True");
+                    
                 }
                 catch (Exception ex)
                 {
                     //MySql CNX!!!!!!!!!
                 }
             }
+            if (con.State.ToString() == "Closed")
+                con.Open();
         }
         public static int IUD(string req)
         {

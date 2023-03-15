@@ -25,7 +25,6 @@ namespace DB
             get { return Id; }
             set { Id = value; }
         }
-
         public Dictionary<string, T> ObjectToDictionary<T>(object obj)
         {
             var json = JsonConvert.SerializeObject(obj);
@@ -43,7 +42,7 @@ namespace DB
                 if (dico.Keys.Contains(property.Name))
                     property.SetValue(model, dico[property.Name]);
             }
-            
+
             return model;
         }
 
@@ -54,7 +53,7 @@ namespace DB
 
             Dictionary<string, string> ChampsTable = Connexion.getChamps_table(GetType().Name);
 
-            if (id == 0)
+            if (Id == 0)
             {
                 StringBuilder sqlBuilder = new StringBuilder();
                 sqlBuilder.Append("INSERT INTO ");
@@ -75,7 +74,7 @@ namespace DB
                 sqlBuilder.Append(")");
                 sqlBuilder.Append(" VALUES (");
 
-                c = -1;
+                c = 0;
                 foreach (KeyValuePair<string, string> kvp in dico)
                 {
                     if (kvp.Key != "id")
@@ -92,7 +91,7 @@ namespace DB
                 sqlBuilder.Append(";");
 
                 sql = sqlBuilder.ToString();
-
+            
             }
             else
             {
@@ -103,28 +102,36 @@ namespace DB
 
                 int c = 0;
                 // work with two dictionaries at the same time
-                foreach (var pair in ChampsTable.Zip(dico, (champ, newvalue) => new { Champ = champ, NewValue = newvalue }))
+                foreach (var Champ in ChampsTable)
                 {
-                    if (pair.Champ.Value != "id")
+                    if (Champ.Value != "id")
                     {
                         if (c > 0)
                             sqlBuilder.Append(",");
-                        sqlBuilder.Append(pair.Champ.Value);
-                        sqlBuilder.Append("=");
-                        sqlBuilder.Append("'");
-                        sqlBuilder.Append(pair.NewValue.Value);
-                        sqlBuilder.Append("'");
+                        foreach(var val in dico)
+                        {
+                            if(Champ.Value == val.Key)
+                            {
+                                sqlBuilder.Append(Champ.Value);
+                                sqlBuilder.Append("=");
+                                sqlBuilder.Append("'");
+                                sqlBuilder.Append(val.Value);
+                                sqlBuilder.Append("' ");
+
+                            }
+                        }
                         c++;
                     }
                 }
                 sqlBuilder.Append("WHERE id = ");
-                sqlBuilder.Append(id);
+                sqlBuilder.Append(Id);
                 sqlBuilder.Append(";");
 
                 sql = sqlBuilder.ToString();
+
             }
             int v = Connexion.IUD(sql);
-            if (v != 0 && v!= -1)
+            if (v != 0 && v != -1)
                 return 0;
             if (v == -1)
                 return -2;// Exception from UID
@@ -135,10 +142,10 @@ namespace DB
         {
             Dictionary<string, object> dico = new Dictionary<string, object>();
 
-            sql = "select * from " + this.GetType().Name + " where id=" + id;
-            Console.WriteLine(sql);
+            sql = "select * from " + this.GetType().Name + " where id=" + Id;
+
             IDataReader data = Connexion.Select(sql);
-            
+
             while (data.Read())
             {
                 for (int i = 0; i < data.FieldCount; i++)
@@ -158,7 +165,7 @@ namespace DB
         {
             Dictionary<string, object> dico = new Dictionary<string, object>();
 
-            string req = "select * from " + typeof(T).Name + " where id =" + id;
+            string req = "select * from " + typeof(T).Name + " where id =" + Id;
 
             //execute query and read data with IDataReader
             IDataReader reader = Connexion.Select(req);
@@ -178,7 +185,7 @@ namespace DB
 
         public int delete()
         {
-            string req = "DELETE from " + this.GetType().Name + " where id = " + id;
+            string req = "DELETE from " + this.GetType().Name + " where id = " + Id;
 
             //execute query and read data with IDataReader
             return Connexion.IUD(req);
@@ -242,16 +249,14 @@ namespace DB
             int c = 0;
             foreach (KeyValuePair<string, object> e in dico)
             {
-                if(e.Value != null)
-                    {
-                    if(c > 0)
+                if (e.Value != null)
+                {
+                    if (c > 0)
                         sql += " and ";
-                    sql += e.Key + "='" + e.Value+"';";
+                    sql += e.Key + "='" + e.Value + "';";
                     c++;
                 }
             }
-            
-           
             IDataReader reader = Connexion.Select(sql);
 
             while (reader.Read())
@@ -259,14 +264,15 @@ namespace DB
                 dico.Clear();
                 for (int i = 0; i < reader.FieldCount; i++)
                 {
-                   dico.Add(reader.GetName(i), reader.GetValue(i));
+                    dico.Add(reader.GetName(i), reader.GetValue(i));
                 }
 
                 L.Add(DictionaryToObject(dico));
 
-                }
-                reader.Close();
-           
+
+            }
+            reader.Close();
+
             return L;
         }
         public static List<dynamic> select<T>(Dictionary<string, object> dico) where T : Model
@@ -277,7 +283,7 @@ namespace DB
 
         public override string ToString()
         {
-            return "ID : " + id;
+            return "ID : " + Id;
         }
     }
 }

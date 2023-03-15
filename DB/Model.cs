@@ -136,7 +136,7 @@ namespace DB
             Dictionary<string, object> dico = new Dictionary<string, object>();
 
             sql = "select * from " + this.GetType().Name + " where id=" + id;
-
+            Console.WriteLine(sql);
             IDataReader data = Connexion.Select(sql);
             
             while (data.Read())

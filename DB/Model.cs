@@ -17,9 +17,14 @@ namespace DB
 {
     public abstract class Model
     {
-        public int id = 0;
+        private int Id = 0;
         private string sql = "";
 
+        public int id
+        {
+            get { return Id; }
+            set { Id = value; }
+        }
 
         public Dictionary<string, T> ObjectToDictionary<T>(object obj)
         {

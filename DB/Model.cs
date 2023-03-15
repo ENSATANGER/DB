@@ -131,6 +131,7 @@ namespace DB
                 sql = sqlBuilder.ToString();
 
             }
+
             int v = Connexion.IUD(sql);
             if (v != 0 && v != -1)
                 return 0;
@@ -162,25 +163,12 @@ namespace DB
 
         //louay's contribution
 
-        public dynamic find<T>(int id)
+        public static dynamic find<T>(int id) where T : Model
         {
-            Dictionary<string, object> dico = new Dictionary<string, object>();
+            var obj = (T)Activator.CreateInstance(typeof(T));
+            obj.id = id;
+            return obj.find();
 
-            string req = "select * from " + typeof(T).Name + " where id =" + Id;
-
-            //execute query and read data with IDataReader
-            IDataReader reader = Connexion.Select(req);
-
-            // loop through columns and rows to add the name and value to dico
-            if (reader != null)
-            {
-                for (int i = 0; i < reader.FieldCount; i++)
-                {
-                    dico.Add(reader.GetName(i), reader.GetValue(i));
-                }
-            }
-            reader.Close();
-            return DictionaryToObject(dico);
         }
 
 

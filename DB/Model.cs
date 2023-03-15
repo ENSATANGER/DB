@@ -39,6 +39,7 @@ namespace DB
 
             foreach (var property in properties)
             {
+               
                 if (dico.Keys.Contains(property.Name))
                     property.SetValue(model, dico[property.Name]);
             }
@@ -130,6 +131,7 @@ namespace DB
                 sql = sqlBuilder.ToString();
 
             }
+
             int v = Connexion.IUD(sql);
             if (v != 0 && v != -1)
                 return 0;
@@ -161,25 +163,12 @@ namespace DB
 
         //louay's contribution
 
-        public dynamic find<T>(int id)
+        public static dynamic find<T>(int id) where T : Model
         {
-            Dictionary<string, object> dico = new Dictionary<string, object>();
+            var obj = (T)Activator.CreateInstance(typeof(T));
+            obj.id = id;
+            return obj.find();
 
-            string req = "select * from " + typeof(T).Name + " where id =" + Id;
-
-            //execute query and read data with IDataReader
-            IDataReader reader = Connexion.Select(req);
-
-            // loop through columns and rows to add the name and value to dico
-            if (reader != null)
-            {
-                for (int i = 0; i < reader.FieldCount; i++)
-                {
-                    dico.Add(reader.GetName(i), reader.GetValue(i));
-                }
-            }
-            reader.Close();
-            return DictionaryToObject(dico);
         }
 
 
@@ -250,16 +239,23 @@ namespace DB
             int c = 0;
             foreach (KeyValuePair<string, object> e in dico)
             {
+                if (e.Key == "id")
+                {
+                    string s=""; s += e.Value;
+                    if (s == "0") continue;
+                }
+
                 if (e.Value != null)
                 {
                     if (c > 0)
                         sql += " and ";
-                    sql += e.Key + "='" + e.Value + "';";
+                    sql += e.Key + "='" + e.Value + "'";
                     c++;
                 }
             }
+            
             IDataReader reader = Connexion.Select(sql);
-
+            
             while (reader.Read())
             {
                 dico.Clear();

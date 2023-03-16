@@ -109,6 +109,7 @@ namespace DB
                     {
                         if (c > 0)
                             sqlBuilder.Append(",");
+
                         foreach(var val in dico)
                         {
                             if(Champ.Value == val.Key)

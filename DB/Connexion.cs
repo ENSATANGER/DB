@@ -18,7 +18,7 @@ namespace DB
             {
                 try
                 {
-                    con = new SqlConnection("Data Source=DESKTOP-9UQDINE;Initial Catalog=ENSAT_TANGER;Integrated Security=True");
+                    con = new SqlConnection("Data Source=localhost;Initial Catalog=ENSA_TANGER;Integrated Security=True");
                     
                 }
                 catch (Exception ex)
@@ -31,6 +31,7 @@ namespace DB
         }
         public static int IUD(string req)
         {
+            Console.WriteLine(req);
             Connect();
             try{
                 cmd = con.CreateCommand();
@@ -38,6 +39,9 @@ namespace DB
                 return cmd.ExecuteNonQuery();
             }
             catch(SqlException ex){
+                string errorMessage = string.Format("Error message: {0}\nSQL statement: {1}", ex.Message, req);
+                Console.WriteLine(errorMessage);
+                Console.WriteLine(ex.Message);
                 return -1;
             }
         }

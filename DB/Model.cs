@@ -167,7 +167,6 @@ namespace DB
             var obj = (T)Activator.CreateInstance(typeof(T));
             obj.id = id;
             return obj.find();
-
         }
 
 
@@ -256,8 +255,6 @@ namespace DB
                 }
 
                 L.Add(DictionaryToObject(dico));
-
-
             }
             reader.Close();
 

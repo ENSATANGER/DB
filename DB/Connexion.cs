@@ -41,7 +41,10 @@ namespace DB
             catch(SqlException ex){
                 string errorMessage = string.Format("Error message: {0}\nSQL statement: {1}", ex.Message, req);
                 Console.WriteLine(errorMessage);
+<<<<<<< Updated upstream
                 Console.WriteLine(ex.Message);
+=======
+>>>>>>> Stashed changes
                 return -1;
             }
         }

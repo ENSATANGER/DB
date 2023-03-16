@@ -207,6 +207,7 @@ namespace DB
 
                 L.Add(DictionaryToObject(dico));
             }
+            reader.Close();
             return L;
         }
         /*public List<dynamic> All()

@@ -12,6 +12,19 @@ namespace DB
     {
         static IDbConnection con = null;
         static IDbCommand cmd = null;
+        
+        public static IDbConnection Con
+        {
+            get { return con; }
+            set { con = value; }
+        }
+
+        public static IDbCommand Cmd
+        {
+            get { return cmd; }
+            set { cmd = value; }
+        }
+        
         public static void Connect()
         {
             if (con == null)

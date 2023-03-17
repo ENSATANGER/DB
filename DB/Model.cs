@@ -194,32 +194,9 @@ namespace DB
 
                 L.Add(DictionaryToObject(dico));
             }
+            reader.Close();
             return L;
         }
-        /*public List<dynamic> All()
-        {
-            List<dynamic> records = new List<dynamic>();
-            // Execute a query to retrieve all records for the table
-            string query = $"SELECT * FROM {GetTableName()}";
-            
-            // it seems like using(...){...} is a better way to use reader
-            // to ensure that there is no resource leaks
-            using (IDataReader reader = Connexion.Select(query))
-            {
-                while (reader.Read())
-                {
-                    Dictionary<string, object> record = new Dictionary<string, object>();
-                    for (int i = 0; i < reader.FieldCount; i++)
-                    {
-                        string columnName = reader.GetName(i);
-                        object value = reader.GetValue(i);
-                        record[columnName] = value;
-                    }
-                    records.Add(record);
-                }
-            }
-            return records;
-        }*/
 
         public static List<dynamic> all<T>() where T : Model
         {
@@ -257,7 +234,6 @@ namespace DB
                 L.Add(DictionaryToObject(dico));
             }
             reader.Close();
-
             return L;
         }
         public static List<dynamic> select<T>(Dictionary<string, object> dico) where T : Model

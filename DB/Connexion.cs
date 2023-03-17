@@ -31,7 +31,7 @@ namespace DB
             {
                 try
                 {
-                    con = new SqlConnection("Data Source=DESKTOP-9UQDINE;Initial Catalog=ENSAT_TANGER;Integrated Security=True");
+                    con = new SqlConnection("Data Source=localhost;Initial Catalog=ENSA_TANGER;Integrated Security=True");
                     
                 }
                 catch (Exception ex)

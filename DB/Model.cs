@@ -39,6 +39,7 @@ namespace DB
 
             foreach (var property in properties)
             {
+               
                 if (dico.Keys.Contains(property.Name))
                     property.SetValue(model, dico[property.Name]);
             }
@@ -213,16 +214,23 @@ namespace DB
             int c = 0;
             foreach (KeyValuePair<string, object> e in dico)
             {
+                if (e.Key == "id")
+                {
+                    string s=""; s += e.Value;
+                    if (s == "0") continue;
+                }
+
                 if (e.Value != null)
                 {
                     if (c > 0)
                         sql += " and ";
-                    sql += e.Key + "='" + e.Value + "';";
+                    sql += e.Key + "='" + e.Value + "'";
                     c++;
                 }
             }
+            
             IDataReader reader = Connexion.Select(sql);
-
+            
             while (reader.Read())
             {
                 dico.Clear();

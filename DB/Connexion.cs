@@ -36,14 +36,17 @@ namespace DB
                 Dictionary<string, string> D = DB("MySql");
                 try
                 {
-                    con = new MySqlConnection("Data source=" + D["Server"] + "; uid=" + D["uid"] + "; pwd=" + D["pwd"] + "; Database=" + D["Database"]);
+                    con = new MySqlConnection("Data source=" + D["Server"] + "; uid=" + D["uid"] +
+                        "; pwd=" + D["pwd"] + "; Database=" + D["Database"]);
                 }
                 catch (Exception Mysql)
                 {
                     D = DB("SqlServer");
                     try
                     {
-                        con = new SqlConnection("Data source=" + D["Server"] + ";Initial Catalog=" + D["InitialCatalog"] + ";Integrated Security=" + D["IntegratedSecurity"]);
+                        con = new SqlConnection("Data source=" + D["Server"] +
+                            ";Initial Catalog=" + D["InitialCatalog"] + ";Integrated Security=" +
+                            D["IntegratedSecurity"]);
                     }
                     catch (Exception MySql)
                     {

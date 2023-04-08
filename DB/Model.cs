@@ -159,8 +159,6 @@ namespace DB
             return DictionaryToObject(dico);
         }
 
-
-
         //louay's contribution
 
         public static dynamic find<T>(int id) where T : Model

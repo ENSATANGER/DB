@@ -106,6 +106,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="scriptMySql.sql" />
     <Content Include="env.xml" />
     <Content Include="script.sql" />
     <Content Include="tr_delete_note.sql" />

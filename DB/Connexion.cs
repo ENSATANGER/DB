@@ -1,10 +1,14 @@
-﻿using System;
+﻿using MySql.Data.MySqlClient;
+using Oracle.DataAccess.Client;
+using Org.BouncyCastle.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace DB
 {
@@ -29,14 +33,22 @@ namespace DB
         {
             if (con == null)
             {
+                Dictionary<string, string> D = DB("MySql");
                 try
                 {
-                    con = new SqlConnection("Data Source=localhost;Initial Catalog=ENSA_TANGER;Integrated Security=True");
-                    
+                    con = new MySqlConnection("Data source=" + D["Server"] + "; uid=" + D["uid"] + "; pwd=" + D["pwd"] + "; Database=" + D["Database"]);
                 }
-                catch (Exception ex)
+                catch (Exception Mysql)
                 {
-                    //MySql CNX!!!!!!!!!
+                    D = DB("SqlServer");
+                    try
+                    {
+                        con = new SqlConnection("Data source=" + D["Server"] + ";Initial Catalog=" + D["InitialCatalog"] + ";Integrated Security=" + D["IntegratedSecurity"]);
+                    }
+                    catch (Exception MySql)
+                    {
+                        Console.WriteLine("aucune base de données disponible");
+                    }
                 }
             }
             if (con.State.ToString() == "Closed")
@@ -68,7 +80,8 @@ namespace DB
             Connect();
             Dictionary<string, string> champs = new Dictionary<string, string>();
             string req = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @table;";
-            cmd = new SqlCommand(req);
+            cmd = con.CreateCommand();
+            cmd.CommandText = req;
             cmd.Connection = con;
             var parameter = cmd.CreateParameter();
             parameter.ParameterName = "@table";
@@ -84,6 +97,24 @@ namespace DB
             dr.Close();
             return champs;
 
+        }
+        public static Dictionary<string, string> DB(string db)
+        {
+
+            XDocument XDatabases = XDocument.Load("./../../../../DB/DB/env.xml");
+
+            XElement XRoot = XDatabases.Root;
+            var XDBS = XRoot.Element(db);
+
+            if (XDBS != null)
+            {
+                Dictionary<string, string> D = new Dictionary<string, string>();
+
+                foreach (XElement el in XDBS.Elements())
+                   D.Add((el.Name).ToString(),el.Value);
+                return D;
+            }
+            return null;
         }
     }
 }

@@ -33,20 +33,28 @@ namespace DB
         {
             if (con == null)
             {
-                Dictionary<string, string> D = DB("MySql");
+                Dictionary<string, string> D = DB("SqlServer");
                 try
                 {
+<<<<<<< Updated upstream
                     con = new MySqlConnection("Data source=" + D["Server"] + "; uid=" + D["uid"] +
                         "; pwd=" + D["pwd"] + "; Database=" + D["Database"]);
+=======
+                    con = new SqlConnection("Data source=" + D["Server"] + ";Initial Catalog=" + D["InitialCatalog"] + ";Integrated Security=" + D["IntegratedSecurity"]);
+>>>>>>> Stashed changes
                 }
-                catch (Exception Mysql)
+                catch (Exception SqlServer)
                 {
-                    D = DB("SqlServer");
+                    D = DB("MySql");
                     try
                     {
+<<<<<<< Updated upstream
                         con = new SqlConnection("Data source=" + D["Server"] +
                             ";Initial Catalog=" + D["InitialCatalog"] + ";Integrated Security=" +
                             D["IntegratedSecurity"]);
+=======
+                        con = new MySqlConnection("Data source=" + D["Server"] + "; uid=" + D["uid"] + "; pwd=" + D["pwd"] + "; Database=" + D["Database"]);
+>>>>>>> Stashed changes
                     }
                     catch (Exception MySql)
                     {

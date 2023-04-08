@@ -112,6 +112,8 @@
     <Content Include="tr_delete_note.sql" />
     <Content Include="tr_insert_note.sql" />
     <Content Include="tr_niveau_jump.sql" />
+    <Content Include="tr_update_niveau_on_update.sql" />
+    <Content Include="tr_update_note.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
